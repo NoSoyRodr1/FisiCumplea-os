@@ -16,21 +16,39 @@ document.addEventListener('keydown', function(e) {
 class BirthdayManager {
     constructor() {
         this.calendar = null;
-        this.setupEventListeners();
+        this.setupCalendar();
     }
 
     setupEventListeners() {
         document.getElementById('birthdayForm').addEventListener('submit', (e) => this.handleAddBirthday(e));
     }
 
+    setupCalendar() {
+        const calendarEl = document.getElementById('calendar');
+        if (calendarEl) {
+            this.calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                height: 650,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth'
+                }
+            });
+        }
+    }
+
     async loadBirthdays() {
+        if (!auth.currentUser) return;
+
         const tarjetasContainer = document.querySelector('.tarjetas-container');
-        tarjetasContainer.innerHTML = '';
+        if (tarjetasContainer) {
+            tarjetasContainer.innerHTML = '';
+        }
 
         try {
-            const snapshot = await db.collection('birthdays')
-                .where('userId', '==', auth.currentUser.uid)
-                .get();
+            const snapshot = await db.collection('birthdays').get();
 
             const birthdays = [];
             snapshot.forEach(doc => {

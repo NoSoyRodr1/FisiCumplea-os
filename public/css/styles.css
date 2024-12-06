@@ -145,3 +145,17 @@ button:hover {
 #verificationSection button:hover {
     background-color: #45a049;
 }
+
+#registerForm input[type="text"],
+#registerForm input[type="date"] {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+#addBirthday {
+    display: none;
+}

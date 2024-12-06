@@ -22,12 +22,15 @@
     <div id="registerSection" class="auth-section" style="display: none;">
         <h2>Registro</h2>
         <form id="registerForm" class="auth-form">
-            <input type="email" id="registerEmail" placeholder="Email" required>
+            <input type="email" id="registerEmail" placeholder="Email (@unmsm.edu.pe)" required>
             <input type="password" id="registerPassword" placeholder="Contraseña" required>
+            <input type="text" id="registerName" placeholder="Nombres y Apellidos" required>
+            <input type="date" id="registerBirthDate" required>
             <button type="submit">Registrarse</button>
         </form>
         <p>¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión aquí</a></p>
     </div>
+    
 
     <div id="mainContent" style="display: none;">
         <header>
@@ -36,20 +39,10 @@
         </header>
         
         <main>
-            <section id="addBirthday" class="form-section">
-                <h2>Agregar Cumpleañero</h2>
-                <form id="birthdayForm">
-                    <input type="text" id="name" placeholder="Nombre" required>
-                    <input type="date" id="birthDate" required>
-                    <button type="submit">Agregar</button>
-                </form>
-            </section>
-
             <section id="tarjetas">
                 <h2>Tarjetas de cumpleaños</h2>
                 <div class="tarjetas-container"></div>
             </section>
-
             <section id="calendario">
                 <h2>Calendario de cumpleaños</h2>
                 <div id="calendar"></div>

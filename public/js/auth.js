@@ -57,16 +57,60 @@ class AuthManager {
         e.preventDefault();
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
+        const name = document.getElementById('registerName').value;
+        const birthDate = document.getElementById('registerBirthDate').value;
+
+        if (!email.endsWith('@unmsm.edu.pe')) {
+            alert('Por favor, utiliza un correo con dominio @unmsm.edu.pe');
+            return;
+        }
 
         try {
+            // Crear usuario
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-            await userCredential.user.sendEmailVerification({
-                url: window.location.href // URL de redirección después de verificar
+            
+            // Guardar datos del cumpleaños
+            await db.collection('birthdays').add({
+                userId: userCredential.user.uid,
+                name: name,
+                birthDate: birthDate,
+                email: email, // Agregamos el email para referencia
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+
+            // Enviar email de verificación
+            await userCredential.user.sendEmailVerification({
+                url: window.location.href
+            });
+            
             e.target.reset();
             alert('Usuario registrado. Por favor, verifica tu correo electrónico.');
         } catch (error) {
+            console.error('Error en el registro:', error);
             alert('Error en el registro: ' + error.message);
+        }
+    }
+
+    handleAuthStateChange(user) {
+        if (user) {
+            if (user.emailVerified) {
+                this.loginSection.style.display = 'none';
+                this.registerSection.style.display = 'none';
+                this.verificationSection.style.display = 'none';
+                this.mainContent.style.display = 'block';
+                // Cargar cumpleaños después de verificar el email
+                birthdayManager.loadBirthdays();
+            } else {
+                this.loginSection.style.display = 'none';
+                this.registerSection.style.display = 'none';
+                this.verificationSection.style.display = 'block';
+                this.mainContent.style.display = 'none';
+            }
+        } else {
+            this.loginSection.style.display = 'block';
+            this.registerSection.style.display = 'none';
+            this.verificationSection.style.display = 'none';
+            this.mainContent.style.display = 'none';
         }
     }
 
