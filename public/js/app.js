@@ -13,17 +13,6 @@ document.addEventListener('keydown', function(e) {
         e.preventDefault();
     }
 });
-(function() {
-    let before = Date.now();
-    let check = setInterval(function() {
-        let devtools = Date.now() - before > 100;
-        if (devtools) {
-        alert('Sin trucos.');
-        clearInterval(check);
-        }
-        before = Date.now();
-    }, 100);
-    })();
 class BirthdayManager {
     constructor() {
         this.calendar = null;
