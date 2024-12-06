@@ -1,13 +1,16 @@
 /* Variables */
 :root {
-    --primary-color: #ff6f61;
-    --secondary-color: #ffde59;
-    --accent-color: #6b5b95;
-    --text-color: #2c3e50;
-    --background-color: #fef9e7;
-    --card-background: #ffffff;
-    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --button-hover: #ff8360;
+    --primary-color: #ff6f61; /* Coral vibrante para elementos destacados */
+    --secondary-color: #ffde59; /* Amarillo cálido para contrastes */
+    --accent-color: #6b5b95; /* Lavanda para detalles decorativos */
+    --text-color: #2c3e50; /* Azul oscuro para texto */
+    --background-color: #fef9e7; /* Crema suave para fondo */
+    --card-background: #ffffff; /* Fondo blanco para tarjetas */
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    --button-hover: #ff8360; /* Tono más claro para botones al pasar el mouse */
+    --danger-color: #f44336; /* Rojo para botones de alerta */
+    --success-color: #4CAF50; /* Verde para acciones exitosas */
+    --input-border: #ddd; /* Color de borde de input */
 }
 
 /* Estilos generales */
@@ -17,46 +20,7 @@ body {
     padding: 0;
     background-color: var(--background-color);
     min-height: 100vh;
-}
-
-/* Estilos de autenticación */
-.auth-section {
-    max-width: 400px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: white;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    text-align: center;
-}
-
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin: 1.5rem 0;
-}
-
-.auth-form input {
-    padding: 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-}
-
-button {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 0.8rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s;
-}
-
-button:hover {
-    background-color: #45a049;
+    color: var(--text-color);
 }
 
 /* Header */
@@ -67,15 +31,69 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: var(--card-shadow);
 }
 
 .logout-btn {
     background-color: transparent;
     border: 1px solid white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 .logout-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Sección de autenticación */
+.auth-section {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: var(--card-background);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.auth-form input {
+    padding: 0.8rem;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+/* Botones */
+button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--button-hover);
+}
+
+#logoutUnverified {
+    background-color: var(--danger-color) !important;
+}
+
+#logoutUnverified:hover {
+    background-color: #da190b !important;
 }
 
 /* Formulario de agregar cumpleaños */
@@ -83,7 +101,7 @@ header {
     max-width: 600px;
     margin: 2rem auto;
     padding: 1.5rem;
-    background: white;
+    background-color: var(--card-background);
     border-radius: 12px;
     box-shadow: var(--card-shadow);
 }
@@ -97,18 +115,19 @@ header {
 #birthdayForm input {
     flex: 1;
     padding: 0.8rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--input-border);
     border-radius: 6px;
 }
 
+/* Sección de verificación */
 #verificationSection {
     max-width: 400px;
     margin: 2rem auto;
     padding: 2rem;
     text-align: center;
-    background-color: white;
+    background-color: var(--card-background);
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow);
 }
 
 #verificationSection button {
@@ -117,21 +136,12 @@ header {
     padding: 0.75rem;
     border: none;
     border-radius: 4px;
-    background-color: #4CAF50;
+    background-color: var(--success-color);
     color: white;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s ease;
 }
 
 #verificationSection button:hover {
     background-color: #45a049;
 }
-
-#logoutUnverified {
-    background-color: #f44336 !important;
-}
-
-#logoutUnverified:hover {
-    background-color: #da190b !important;
-}
-/*
