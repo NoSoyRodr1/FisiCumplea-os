@@ -77,9 +77,6 @@ class AuthManager {
 
         try {
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
-            if (!userCredential.user.emailVerified) {
-                alert('Por favor, verifica tu correo electrónico antes de iniciar sesión.');
-            }
             e.target.reset();
         } catch (error) {
             alert('Error en el login: ' + error.message);
