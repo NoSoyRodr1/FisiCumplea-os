@@ -1,72 +1,140 @@
-// Referencias a elementos DOM
-const loginSection = document.getElementById('loginSection');
-const registerSection = document.getElementById('registerSection');
-const mainContent = document.getElementById('mainContent');
-const loginForm = document.getElementById('loginForm');
-const registerForm = document.getElementById('registerForm');
-const logoutBtn = document.getElementById('logoutBtn');
-const showRegisterLink = document.getElementById('showRegister');
-const showLoginLink = document.getElementById('showLogin');
-
-// Alternar entre formularios de login y registro
-showRegisterLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    loginSection.style.display = 'none';
-    registerSection.style.display = 'block';
-});
-
-showLoginLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    registerSection.style.display = 'none';
-    loginSection.style.display = 'block';
-});
-
-// Registro de usuarios
-registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-
-    try {
-        await auth.createUserWithEmailAndPassword(email, password);
-        registerForm.reset();
-        alert('Usuario registrado exitosamente');
-    } catch (error) {
-        alert('Error en el registro: ' + error.message);
+// auth.js
+class AuthManager {
+    constructor() {
+        this.loginSection = document.getElementById('loginSection');
+        this.registerSection = document.getElementById('registerSection');
+        this.mainContent = document.getElementById('mainContent');
+        this.verificationSection = document.createElement('div');
+        this.setupVerificationSection();
+        this.setupEventListeners();
     }
-});
 
-// Login de usuarios
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-
-    try {
-        await auth.signInWithEmailAndPassword(email, password);
-        loginForm.reset();
-    } catch (error) {
-        alert('Error en el login: ' + error.message);
+    setupVerificationSection() {
+        this.verificationSection.id = 'verificationSection';
+        this.verificationSection.className = 'auth-section';
+        this.verificationSection.style.display = 'none';
+        this.verificationSection.innerHTML = `
+            <h2>Verifica tu correo electrónico</h2>
+            <p>Te hemos enviado un correo de verificación.</p>
+            <p>Por favor, revisa tu bandeja de entrada y sigue las instrucciones.</p>
+            <button id="resendVerification" class="auth-button">Reenviar correo de verificación</button>
+            <button id="refreshVerification" class="auth-button">Ya verifiqué mi correo</button>
+            <button id="logoutUnverified" class="auth-button">Cerrar sesión</button>
+        `;
+        document.body.insertBefore(this.verificationSection, this.mainContent);
     }
-});
 
-// Logout
-logoutBtn.addEventListener('click', () => {
-    auth.signOut();
-});
+    setupEventListeners() {
+        // Eventos existentes
+        document.getElementById('showRegister').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.toggleForms('register');
+        });
 
-// Observer de estado de autenticación
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        // Usuario está logueado
-        loginSection.style.display = 'none';
-        registerSection.style.display = 'none';
-        mainContent.style.display = 'block';
-        loadBirthdays(); // Cargar cumpleaños al iniciar sesión
-    } else {
-        // Usuario no está logueado
-        loginSection.style.display = 'block';
-        registerSection.style.display = 'none';
-        mainContent.style.display = 'none';
+        document.getElementById('showLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.toggleForms('login');
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', (e) => this.handleRegister(e));
+        document.getElementById('loginForm').addEventListener('submit', (e) => this.handleLogin(e));
+        document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+
+        // Nuevos eventos para verificación
+        document.getElementById('resendVerification').addEventListener('click', () => this.resendVerificationEmail());
+        document.getElementById('refreshVerification').addEventListener('click', () => this.checkVerification());
+        document.getElementById('logoutUnverified').addEventListener('click', () => auth.signOut());
+
+        // Observer de estado de autenticación
+        auth.onAuthStateChanged((user) => this.handleAuthStateChange(user));
     }
-});
+
+    toggleForms(form) {
+        this.loginSection.style.display = form === 'login' ? 'block' : 'none';
+        this.registerSection.style.display = form === 'register' ? 'block' : 'none';
+        this.verificationSection.style.display = 'none';
+    }
+
+    async handleRegister(e) {
+        e.preventDefault();
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+
+        try {
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            await userCredential.user.sendEmailVerification({
+                url: window.location.href // URL de redirección después de verificar
+            });
+            e.target.reset();
+            alert('Usuario registrado. Por favor, verifica tu correo electrónico.');
+        } catch (error) {
+            alert('Error en el registro: ' + error.message);
+        }
+    }
+
+    async handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            if (!userCredential.user.emailVerified) {
+                alert('Por favor, verifica tu correo electrónico antes de iniciar sesión.');
+            }
+            e.target.reset();
+        } catch (error) {
+            alert('Error en el login: ' + error.message);
+        }
+    }
+
+    async resendVerificationEmail() {
+        try {
+            const user = auth.currentUser;
+            await user.sendEmailVerification({
+                url: window.location.href
+            });
+            alert('Correo de verificación reenviado. Por favor revisa tu bandeja de entrada.');
+        } catch (error) {
+            alert('Error al reenviar el correo: ' + error.message);
+        }
+    }
+
+    async checkVerification() {
+        try {
+            await auth.currentUser.reload();
+            if (auth.currentUser.emailVerified) {
+                this.handleAuthStateChange(auth.currentUser);
+            } else {
+                alert('Tu correo aún no ha sido verificado. Por favor, verifica tu correo e intenta nuevamente.');
+            }
+        } catch (error) {
+            alert('Error al verificar el estado del correo: ' + error.message);
+        }
+    }
+
+    handleAuthStateChange(user) {
+        if (user) {
+            if (user.emailVerified) {
+                // Usuario verificado - mostrar contenido principal
+                this.loginSection.style.display = 'none';
+                this.registerSection.style.display = 'none';
+                this.verificationSection.style.display = 'none';
+                this.mainContent.style.display = 'block';
+                birthdayManager.loadBirthdays();
+            } else {
+                // Usuario no verificado - mostrar sección de verificación
+                this.loginSection.style.display = 'none';
+                this.registerSection.style.display = 'none';
+                this.verificationSection.style.display = 'block';
+                this.mainContent.style.display = 'none';
+            }
+        } else {
+            // No hay usuario - mostrar login
+            this.loginSection.style.display = 'block';
+            this.registerSection.style.display = 'none';
+            this.verificationSection.style.display = 'none';
+            this.mainContent.style.display = 'none';
+        }
+    }
+}
