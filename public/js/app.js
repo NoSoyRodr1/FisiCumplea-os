@@ -1,4 +1,29 @@
-// birthday-manager.js
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    alert('Clic derecho deshabilitado.');
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === "F12") {
+        e.preventDefault();
+    }
+    if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) {
+        e.preventDefault();
+    }
+    if (e.ctrlKey && e.key === "U") {
+        e.preventDefault();
+    }
+});
+(function() {
+    let before = Date.now();
+    let check = setInterval(function() {
+        let devtools = Date.now() - before > 100;
+        if (devtools) {
+        alert('Sin trucos.');
+        clearInterval(check);
+        }
+        before = Date.now();
+    }, 100);
+    })();
 class BirthdayManager {
     constructor() {
         this.calendar = null;
@@ -57,7 +82,7 @@ class BirthdayManager {
         if (!this.calendar) {
             this.calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                locale: 'es', // El español ahora estará disponible correctamente
+                locale: 'es',
                 height: 650,
                 headerToolbar: {
                     left: 'prev,next today',
@@ -147,7 +172,6 @@ class BirthdayManager {
             throw new Error('Usuario no autenticado');
         }
 
-        // Validar datos antes de guardar
         if (!this.validateBirthdayData(birthdayData)) {
             throw new Error('Datos de cumpleaños inválidos');
         }
@@ -183,7 +207,6 @@ class BirthdayManager {
             return false;
         }
 
-        // Validar que la fecha no sea futura
         if (birthDate > new Date()) {
             return false;
         }

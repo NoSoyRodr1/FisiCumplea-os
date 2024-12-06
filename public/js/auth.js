@@ -1,4 +1,3 @@
-// auth.js
 class AuthManager {
     constructor() {
         this.loginSection = document.getElementById('loginSection');
@@ -25,7 +24,6 @@ class AuthManager {
     }
 
     setupEventListeners() {
-        // Eventos existentes
         document.getElementById('showRegister').addEventListener('click', (e) => {
             e.preventDefault();
             this.toggleForms('register');

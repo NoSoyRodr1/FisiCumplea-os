@@ -1,4 +1,3 @@
-// config.js
 const firebaseConfig = {
     apiKey: "AIzaSyDS3pu46uu9dZsO_YanlROPia5vpiYIcZA",
     authDomain: "fisicumpleanos.firebaseapp.com",
@@ -8,7 +7,6 @@ const firebaseConfig = {
     appId: "1:995378178157:web:93dc5a5ad23cc424133764"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 console.log('Firebase inicializado correctamente');
 const auth = firebase.auth();
