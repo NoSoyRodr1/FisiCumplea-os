@@ -155,21 +155,21 @@ class AuthManager {
     handleAuthStateChange(user) {
         if (user) {
             if (user.emailVerified) {
-                // Usuario verificado - mostrar contenido principal
                 this.loginSection.style.display = 'none';
                 this.registerSection.style.display = 'none';
                 this.verificationSection.style.display = 'none';
                 this.mainContent.style.display = 'block';
+                
+                // Inicializar y cargar cumpleaños
+                const birthdayManager = new BirthdayManager();
                 birthdayManager.loadBirthdays();
             } else {
-                // Usuario no verificado - mostrar sección de verificación
                 this.loginSection.style.display = 'none';
                 this.registerSection.style.display = 'none';
                 this.verificationSection.style.display = 'block';
                 this.mainContent.style.display = 'none';
             }
         } else {
-            // No hay usuario - mostrar login
             this.loginSection.style.display = 'block';
             this.registerSection.style.display = 'none';
             this.verificationSection.style.display = 'none';

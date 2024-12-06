@@ -16,14 +16,10 @@ document.addEventListener('keydown', function(e) {
 class BirthdayManager {
     constructor() {
         this.calendar = null;
-        this.setupCalendar();
+        this.initializeCalendar();
     }
 
-    setupEventListeners() {
-        document.getElementById('birthdayForm').addEventListener('submit', (e) => this.handleAddBirthday(e));
-    }
-
-    setupCalendar() {
+    initializeCalendar() {
         const calendarEl = document.getElementById('calendar');
         if (calendarEl) {
             this.calendar = new FullCalendar.Calendar(calendarEl, {
@@ -36,23 +32,32 @@ class BirthdayManager {
                     right: 'dayGridMonth'
                 }
             });
+            this.calendar.render();
         }
     }
 
     async loadBirthdays() {
-        if (!auth.currentUser) return;
-
         const tarjetasContainer = document.querySelector('.tarjetas-container');
-        if (tarjetasContainer) {
-            tarjetasContainer.innerHTML = '';
-        }
+        if (!tarjetasContainer) return;
+        
+        tarjetasContainer.innerHTML = '';
 
         try {
-            const snapshot = await db.collection('birthdays').get();
+            if (!auth.currentUser) {
+                console.error('No hay usuario autenticado');
+                return;
+            }
+
+            console.log('Consultando cumpleaños para usuario:', auth.currentUser.uid);
+            
+            const snapshot = await db.collection('birthdays')
+                .where('userId', '==', auth.currentUser.uid)
+                .get();
 
             const birthdays = [];
             snapshot.forEach(doc => {
                 birthdays.push({ id: doc.id, ...doc.data() });
+                console.log('Cumpleaños encontrado:', doc.data());
             });
 
             this.renderBirthdays(birthdays);
@@ -67,6 +72,8 @@ class BirthdayManager {
         const tarjetasContainer = document.querySelector('.tarjetas-container');
         
         birthdays.forEach(({ id, name, birthDate }) => {
+            console.log('Renderizando tarjeta para:', name, birthDate);
+            
             const nextBirthdayDate = this.getNextBirthday(birthDate);
             const nextAge = this.calculateAge(birthDate, nextBirthdayDate.getFullYear());
             
@@ -77,77 +84,34 @@ class BirthdayManager {
                 <p>Fecha de nacimiento: ${this.formatDate(birthDate)}</p>
                 <p>Próximo cumpleaños: ${this.formatDate(nextBirthdayDate)}</p>
                 <p>Cumplirá: ${nextAge} años</p>
-                <button onclick="birthdayManager.deleteBirthday('${id}')" class="delete-btn">Eliminar</button>
             `;
             tarjetasContainer.appendChild(tarjeta);
         });
     }
 
     updateCalendar(birthdays) {
-        const calendarEl = document.getElementById('calendar');
-        
         if (!this.calendar) {
-            this.calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'es',
-                height: 650,
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth'
-                }
-            });
+            console.error('Calendario no inicializado');
+            return;
         }
 
         this.calendar.removeAllEvents();
 
         const events = birthdays.map(({ name, birthDate }) => {
+            console.log('Creando evento para:', name, birthDate);
             const nextBirthday = this.getNextBirthday(birthDate);
             const nextAge = this.calculateAge(birthDate, nextBirthday.getFullYear());
             return {
                 title: `🎂 ${name} (${nextAge} años)`,
-                start: nextBirthday,
+                start: nextBirthday.toISOString().split('T')[0],
                 allDay: true,
                 className: 'birthday-event'
             };
         });
 
+        console.log('Eventos del calendario:', events);
         this.calendar.addEventSource(events);
         this.calendar.render();
-    }
-
-    async handleAddBirthday(e) {
-        e.preventDefault();
-        
-        const name = document.getElementById('name').value;
-        const birthDate = document.getElementById('birthDate').value;
-
-        try {
-            await db.collection('birthdays').add({
-                userId: auth.currentUser.uid,
-                name,
-                birthDate,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            e.target.reset();
-            this.loadBirthdays();
-        } catch (error) {
-            console.error('Error agregando cumpleaños:', error);
-            alert('Error al agregar el cumpleaños');
-        }
-    }
-
-    async deleteBirthday(id) {
-        if (confirm('¿Estás seguro de querer eliminar este cumpleaños?')) {
-            try {
-                await db.collection('birthdays').doc(id).delete();
-                this.loadBirthdays();
-            } catch (error) {
-                console.error('Error eliminando cumpleaños:', error);
-                alert('Error al eliminar el cumpleaños');
-            }
-        }
     }
 
     calculateAge(birthDate, currentYear = new Date().getFullYear()) {
@@ -174,6 +138,7 @@ class BirthdayManager {
         
         return nextBirthday;
     }
+
     async addBirthday(birthdayData) {
         if (!auth.currentUser) {
             throw new Error('Usuario no autenticado');
@@ -273,3 +238,34 @@ class BirthdayManager {
 // Initialize managers
 const authManager = new AuthManager();
 const birthdayManager = new BirthdayManager();
+const styles = `
+.tarjeta {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tarjeta h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.tarjetas-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.birthday-event {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+`;
+
+// Agregar los estilos al documento
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
